@@ -81,26 +81,42 @@
 -*----------------------------------------------------------------------------*/
 void WATCHDOG_Init(const uint32_t WDT_COUNT)
 {
-#if 0  
-   // Enable write access to IWDG_PR and IWDG_RLR registers
-   IWDG->KR = 0x5555;
+    // Even though the LFOSC is disabled after a reset and the register reads
+    // disabled, the oscillator is automatically enabled whenever it's used by
+    // the WDT. This means we do not need to enable it here.
 
-   // Set pre-scalar to 4 (timer resolution is 125¦Ìs)
-   IWDG->PR = 0x00;
+    // WDT interval given by:
+    //
+    // 4 ^ (3 + WDTCN[2:0]) * TLFOSC
+    //
+    // The LFOSC is running at 80 kHz
+    //
+    // We want a timeout of approximately 10 ms.
+    //
+    // 4 ^ (3 + 2) * 12.5 us = 12.8 ms
 
-   // Counts down to 0 in increments of 125¦Ìs
-   // Max reload value is 0xFFF (4095) or ~511 ms (with this prescalar)
-   IWDG->RLR = WDT_COUNT;
+    // WDTCN.7 must be cleared to 0 to write the timeout interval
+    ///WDTCN = 0x02;
 
-   // Reload IWDG counter
-   IWDG->KR = 0xAAAA;
+    // Enable and feed the watchdog
+    ///WDTCN = 0xA5;
+    
+    /*
+    To configure the WDT, perform the following tasks:
+    1. Disable the WDT by writing a 0 to the WDTE bit.
+    2. Select the desired PCA clock source (with the CPS2¨CCPS0 bits). default is SYSCLK/12
+    3. Load PCA0CPL4 with the desired WDT update offset value.
+    4. Configure the PCA Idle mode (set CIDL if the WDT should be suspended while the CPU is in Idle mode).
+    5. Enable the WDT by setting the WDTE bit to 1.
+    6. Reset the WDT timer by writing to PCA0CPH4.    
+    */
+    
+    PCA0CPL4 = 0xFF;
 
-   // Enable IWDG (the LSI oscillator will be enabled by hardware)
-   IWDG->KR = 0xCCCC;
-#endif
+    PCA0MD |= 0x40;						// Enable Watchdog timer, WDTE = 1
    
-   // Feed watchdog
-   WATCHDOG_Update();
+    // Feed watchdog
+    WATCHDOG_Update();
 }
 
 /*----------------------------------------------------------------------------*-
@@ -141,25 +157,20 @@ void WATCHDOG_Init(const uint32_t WDT_COUNT)
 -*----------------------------------------------------------------------------*/
 void WATCHDOG_Update(void)
 {
-   // Feed the watchdog (reload IWDG counter)
+    // Feed the watchdog (reload IWDG counter)
+    PCA0CPH4 = 0x0;
 }
 
 uint8_t reset_by_watchdog(void)
 {
-    /*
-    if (reset_by_watchdog)
+    if (RSTSRC == 0x08)
     {
-        clear the flag
-
         return 1;
     }
     else
     {
         return 0;
-    }
-    */
-  
-    return 0;  
+    }  
 }
 
 /*----------------------------------------------------------------------------*-
