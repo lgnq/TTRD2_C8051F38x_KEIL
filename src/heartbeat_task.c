@@ -77,6 +77,9 @@ void HEARTBEAT_SW_U_Init(void)
     P0SKIP  = 0xCF;		// GPIO, GPIO, TX, RX, GPIO...
 
     XBR1 = 0xC0;        // disable weak pull-up, enable crossbar
+    
+    LED_G = 1;
+    LED_R = 1;
 }
 
 /*----------------------------------------------------------------------------*-
@@ -212,14 +215,14 @@ void HEARTBEAT_SW_U_Update2(void)
         Heartbeat_state_s = 0;
 
         //todo : turn LED on
-        LED_R = 0;
+        LED_G = 0;
     }
     else
     {
         Heartbeat_state_s = 1;
 
         //todo : turn LED off
-        LED_R = 1;
+        LED_G = 1;
     }
 }
 
