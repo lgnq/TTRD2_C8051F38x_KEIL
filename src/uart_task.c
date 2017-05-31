@@ -104,7 +104,40 @@ void UART2_BUF_O_Send_Char(const char);
 -*----------------------------------------------------------------------------*/
 void UART2_BUF_O_Init(uint32_t BAUD_RATE)
 {
-    //todo : init the uart
+    SCON0 = 0x10;                       // SCON0: 8-bit variable bit rate
+                                        //        level of STOP bit is ignored
+                                        //        RX enabled
+                                        //        ninth bits are zeros
+                                        //        clear RI0 and TI0 bits
+    if (SYSCLK/BAUD_RATE/2/256 < 1) 
+    {
+        TH1 = -(SYSCLK/BAUD_RATE/2);
+        CKCON &= ~0x0B;                  // T1M = 1; SCA1:0 = xx
+        CKCON |=  0x08;
+    } 
+    else if (SYSCLK/BAUD_RATE/2/256 < 4) 
+    {
+        TH1 = -(SYSCLK/BAUD_RATE/2/4);
+        CKCON &= ~0x0B;                  // T1M = 0; SCA1:0 = 01
+        CKCON |=  0x01;
+    } 
+    else if (SYSCLK/BAUD_RATE/2/256 < 12) 
+    {
+        TH1 = -(SYSCLK/BAUD_RATE/2/12);
+        CKCON &= ~0x0B;                  // T1M = 0; SCA1:0 = 00
+    } 
+    else 
+    {
+        TH1 = -(SYSCLK/BAUD_RATE/2/48);
+        CKCON &= ~0x0B;                  // T1M = 0; SCA1:0 = 10
+        CKCON |=  0x02;
+    }
+
+    TL1 = TH1;                          // init Timer1
+    TMOD &= ~0xf0;                      // TMOD: timer 1 in 8-bit autoreload
+    TMOD |=  0x20;
+    TR1 = 1;                            // START Timer1
+    ES0 = 0;                            // Enable UART0 interrupts    
 }
 
 /*----------------------------------------------------------------------------*-
@@ -510,14 +543,12 @@ void UART2_BUF_O_Write_Number02_To_Buffer(const uint32_t DATA)
 -*----------------------------------------------------------------------------*/
 void UART2_BUF_O_Send_Char(const char CHARACTER)
 {
-#if 0
-    // Wait for USART to be free
-    // Requires a 'peripheral timeout' mechanism (see ERES2, Chapter 5)
-    while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == 0);
-
-    USART_SendData(USART2, CHARACTER);
-#else
-#endif
+    SBUF0 = CHARACTER;
+    
+    while (TI0 == 0)
+        ;
+    
+    TI0 = 0;
 }
 
 void protocol_processor(uint8_t c)
