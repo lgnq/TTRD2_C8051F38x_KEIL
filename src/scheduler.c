@@ -121,7 +121,7 @@ void SCH_Init_Milliseconds(const uint32_t TICKms)
 #else
 //    system_clock_init(16000000);
    
-    timer_init(1);
+    timer_init(TICKms);
 #endif   
 }
 
