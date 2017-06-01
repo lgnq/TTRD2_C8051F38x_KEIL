@@ -81,7 +81,7 @@ void sleep(void)
 void mcu_init(void)
 {
     //init system clock
-    system_clock_init(16000000);
+    system_clock_init(48000000);
 
     int_enable();
 }
