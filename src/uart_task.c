@@ -138,6 +138,11 @@ void UART2_BUF_O_Init(uint32_t BAUD_RATE)
     TMOD |=  0x20;
     TR1 = 1;                            // START Timer1
     ES0 = 0;                            // Enable UART0 interrupts    
+
+    Out_written_index_g = 0;
+    Out_waiting_index_g = 0;
+    In_read_index_g = 0;
+    In_waiting_index_g = 0;
 }
 
 /*----------------------------------------------------------------------------*-
@@ -179,12 +184,12 @@ void UART2_BUF_O_Init(uint32_t BAUD_RATE)
 
 -*----------------------------------------------------------------------------*/
 void UART2_BUF_O_Update(void)
-{
+{   
     // Deal with transmit bytes here
 
     // Is there any data ready to send?
     if (Out_written_index_g < Out_waiting_index_g)
-    {
+    {       
         UART2_BUF_O_Send_Char(Tx_buffer_g[Out_written_index_g]);
 
         Out_written_index_g++;
@@ -196,7 +201,7 @@ void UART2_BUF_O_Update(void)
         Out_written_index_g = 0;
     }
 
-    if (RI0 == 1)
+    if (RI0)
     {
         // Flag only set when a valid stop bit is received,
         // -> data ready to be read into the received buffer
@@ -542,15 +547,16 @@ void UART2_BUF_O_Write_Number02_To_Buffer(const uint32_t DATA)
 
 -*----------------------------------------------------------------------------*/
 void UART2_BUF_O_Send_Char(const char CHARACTER)
-{
-#if 0    
+{ 
+    uint8_t timeout = 0;
+
     SBUF0 = CHARACTER;
     
-    while (TI0 == 0)
-        ;
+    while (++timeout && !TI0)    
+        LED_G = 1;
     
+    LED_G = 0;
     TI0 = 0;
-#endif
 }
 
 void protocol_processor(uint8_t c)
