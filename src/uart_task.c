@@ -543,12 +543,14 @@ void UART2_BUF_O_Write_Number02_To_Buffer(const uint32_t DATA)
 -*----------------------------------------------------------------------------*/
 void UART2_BUF_O_Send_Char(const char CHARACTER)
 {
+#if 0    
     SBUF0 = CHARACTER;
     
     while (TI0 == 0)
         ;
     
     TI0 = 0;
+#endif
 }
 
 void protocol_processor(uint8_t c)

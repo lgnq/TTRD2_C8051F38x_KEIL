@@ -128,9 +128,9 @@ void HEARTBEAT_SW_U_Update1(void)
     static uint32_t Heartbeat_state_s = 0;
     static uint32_t Countdown_s = 10;
 
-    UART2_BUF_O_Write_String_To_Buffer("\nCountdown : ");
-    UART2_BUF_O_Write_Number03_To_Buffer(Countdown_s);
-    UART2_BUF_O_Write_String_To_Buffer("\n");
+    //UART2_BUF_O_Write_String_To_Buffer("\nCountdown : ");
+    //UART2_BUF_O_Write_Number03_To_Buffer(Countdown_s);
+    //UART2_BUF_O_Write_String_To_Buffer("\n");
 
     if (Countdown_s-- == 0)
     {
@@ -147,17 +147,17 @@ void HEARTBEAT_SW_U_Update1(void)
         {
             Heartbeat_state_s = 0;
             //todo : turn LED on
-            LED_G = 0;
+            LED_R = 0;
 
-            UART2_BUF_O_Write_String_To_Buffer("LED On ...\n");
+            //UART2_BUF_O_Write_String_To_Buffer("LED On ...\n");
         }
         else
         {
             Heartbeat_state_s = 1;
             //todo : turn LED off
-            LED_G = 1;
+            LED_R = 1;
             
-            UART2_BUF_O_Write_String_To_Buffer("LED Off ...\n");
+            //UART2_BUF_O_Write_String_To_Buffer("LED Off ...\n");
         }
     }
     else
