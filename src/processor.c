@@ -188,7 +188,7 @@ void PROCESSOR_Configure_Reqd_MoSt(void)
             SCH_Init_Milliseconds(1);
 
             tasks_init();
-            LED_R = 0;
+
             // Feed the watchdog
             WATCHDOG_Update();
 
