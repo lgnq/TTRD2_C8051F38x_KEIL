@@ -145,8 +145,8 @@ void UART2_BUF_O_Init(uint32_t BAUD_RATE)
     ES0 = 0;                            // Enable UART0 interrupts    
 
     //init UART pin
-    //P0SKIP = 0xCF;                      // GPIO, GPIO, TX, RX, GPIO...
-    //XBR0 = 0x01;                        // .... ...(UART0)   
+    P0SKIP = 0xCF;                      // GPIO, GPIO, TX, RX, GPIO...
+    XBR0 = 0x01;                        // .... ...(UART0)   
 }
 
 /*----------------------------------------------------------------------------*-
