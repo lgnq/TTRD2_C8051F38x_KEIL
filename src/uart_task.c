@@ -104,6 +104,11 @@ void UART2_BUF_O_Send_Char(const char);
 -*----------------------------------------------------------------------------*/
 void UART2_BUF_O_Init(uint32_t BAUD_RATE)
 {
+    Out_written_index_g = 0;
+    Out_waiting_index_g = 0;
+    In_read_index_g     = 0;
+    In_waiting_index_g  = 0;
+    
     SCON0 = 0x10;                       // SCON0: 8-bit variable bit rate
                                         //        level of STOP bit is ignored
                                         //        RX enabled
@@ -139,10 +144,9 @@ void UART2_BUF_O_Init(uint32_t BAUD_RATE)
     TR1 = 1;                            // START Timer1
     ES0 = 0;                            // Enable UART0 interrupts    
 
-    Out_written_index_g = 0;
-    Out_waiting_index_g = 0;
-    In_read_index_g = 0;
-    In_waiting_index_g = 0;
+    //init UART pin
+    //P0SKIP = 0xCF;                      // GPIO, GPIO, TX, RX, GPIO...
+    //XBR0 = 0x01;                        // .... ...(UART0)   
 }
 
 /*----------------------------------------------------------------------------*-
@@ -547,7 +551,8 @@ void UART2_BUF_O_Write_Number02_To_Buffer(const uint32_t DATA)
 
 -*----------------------------------------------------------------------------*/
 void UART2_BUF_O_Send_Char(const char CHARACTER)
-{ 
+{
+#if 0    
     uint8_t timeout = 0;
 
     SBUF0 = CHARACTER;
@@ -557,6 +562,14 @@ void UART2_BUF_O_Send_Char(const char CHARACTER)
     
     LED_G = 0;
     TI0 = 0;
+#else
+    SBUF0 = CHARACTER;
+    
+    while (!TI0)    
+        ;
+    
+    TI0 = 0;    
+#endif
 }
 
 void protocol_processor(uint8_t c)
